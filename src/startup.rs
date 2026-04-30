@@ -1,8 +1,10 @@
-fn run() {
-    println!("run!");
+use crate::{config::Settings, llm::LlmClient};
+
+pub struct App {
+    pub llm: LlmClient,
 }
 
-fn build() {
-    println!("build!");
+pub fn build(settings: Settings) -> anyhow::Result<App> {
+    let llm = LlmClient::new(settings.llm.base_url, settings.llm.model);
+    Ok(App { llm })
 }
-
