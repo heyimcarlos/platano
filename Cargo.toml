@@ -1,10 +1,19 @@
 [package]
 name = "platano"
 version = "0.1.0"
+authors = ["Carlos de la Cruz <carlos.cruzta@gmail.com>"]
 edition = "2024"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "platano"
 
 [dependencies]
 anyhow = "1.0.102"
+config = "0.15.22"
 reqwest = { version = "0.13.3", default-features = false, features = ["rustls", "json"] }
 secrecy = { version = "0.10.3", features = ["serde"] }
 serde = { version = "1.0.228", features = ["derive"] }
@@ -12,4 +21,7 @@ serde_json = "1.0.149"
 thiserror = "2.0.18"
 tokio = { version = "1.52.1", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.44"
+tracing-bunyan-formatter = "0.3.10"
+tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+
