@@ -13,6 +13,7 @@ name = "platano"
 
 [dependencies]
 anyhow = "1.0.102"
+async-trait = "0.1.89"
 config = "0.15.22"
 reqwest = { version = "0.13.3", default-features = false, features = ["rustls", "json"] }
 secrecy = { version = "0.10.3", features = ["serde"] }
