@@ -1,8 +1,10 @@
-use async_trait::async_trait;
+use anyhow::Context;
 use reqwest::Client;
 use tracing::instrument;
 
 use super::{LlmClient, types::*};
+
+use async_trait::async_trait;
 
 pub struct OllamaClient {
     http: Client,
@@ -22,8 +24,12 @@ impl OllamaClient {
 
 #[async_trait]
 impl LlmClient for OllamaClient {
-    #[instrument(skip(self, messages), fields(model = %self.model, msg_count = messages.len()))]
-    async fn chat(&self, messages: Vec<Message>) -> anyhow::Result<ChatResponse> {
+    #[instrument(skip_all, fields(model = %self.model, msg_count = messages.len()), level = "debug")]
+    async fn chat(
+        &self,
+        messages: Vec<Message>,
+        tools: Vec<ToolDefinition>,
+    ) -> anyhow::Result<ChatResponse> {
         let url = format!("{}/api/chat", self.base_url);
         let request = ChatRequest {
             model: self.model.clone(),
@@ -33,6 +39,7 @@ impl LlmClient for OllamaClient {
                 num_ctx: 8192,
                 temperature: 0.7,
             },
+            tools,
         };
 
         let response = self

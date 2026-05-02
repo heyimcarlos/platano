@@ -1,31 +1,25 @@
 use platano::{
-    config::get_config,
-    llm::types::{Message, Role},
+    config::{Environment, get_config},
     startup::build,
-    telemetry::{get_subscriber, init_subscriber},
+    telemetry::{get_pretty_subscriber, get_subscriber, init_subscriber},
 };
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let subscriber = get_subscriber("platano".into(), "info".into(), std::io::stdout);
+    let environment = Environment::from_env();
+
+    let subscriber = match environment {
+        Environment::Production => get_subscriber("platano".into(), "info".into(), std::io::stdout),
+        Environment::Local => get_pretty_subscriber("info,platano=debug".into()),
+    };
     init_subscriber(subscriber);
 
     let settings = get_config().expect("Failed to read config");
-    let app = build(settings)?;
+    let agent = build(settings)?;
 
-    let prompt = std::env::args()
-        .nth(1)
-        .unwrap_or_else(|| "Greet me.".into());
-
-    let response = app
-        .llm
-        .chat(vec![Message {
-            role: Role::User,
-            content: prompt,
-        }])
-        .await?;
-
-    println!("{}", response.message.content);
+    let prompt = std::env::args().nth(1).unwrap_or_else(|| "hello".into());
+    let response = agent.run(prompt).await?;
+    println!("Agent response: {}", response);
 
     Ok(())
 }
