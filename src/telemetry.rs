@@ -7,7 +7,7 @@ pub fn get_subscriber<Sink>(
     name: String,
     env_filter: String,
     sink: Sink,
-) -> impl Subscriber + Send + Sync
+) -> Box<dyn Subscriber + Send + Sync>
 where
     Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
 {
@@ -15,10 +15,29 @@ where
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
     let formatting_layer = BunyanFormattingLayer::new(name, sink);
 
-    Registry::default()
-        .with(env_filter)
-        .with(JsonStorageLayer)
-        .with(formatting_layer)
+    Box::new(
+        Registry::default()
+            .with(env_filter)
+            .with(JsonStorageLayer)
+            .with(formatting_layer),
+    )
+}
+
+pub fn get_pretty_subscriber(env_filter: String) -> Box<dyn Subscriber + Send + Sync> {
+    use tracing_subscriber::fmt;
+
+    let env_filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
+
+    Box::new(
+        Registry::default().with(env_filter).with(
+            fmt::layer()
+                .compact()
+                .with_target(false)
+                .with_thread_ids(false)
+                .with_thread_names(false),
+        ),
+    )
 }
 
 pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
