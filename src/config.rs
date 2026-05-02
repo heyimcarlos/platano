@@ -2,11 +2,11 @@ use serde;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct Settings {
-    pub llm: LLMSettings,
+    pub llm: LlMSettings,
 }
 
 #[derive(serde::Deserialize, Debug)]
-pub struct LLMSettings {
+pub struct LlMSettings {
     pub base_url: String,
     pub model: String,
     pub temperature: Option<f32>,
@@ -18,6 +18,12 @@ pub enum Environment {
 }
 
 impl Environment {
+    pub fn from_env() -> Self {
+        std::env::var("APP_ENVIRONMENT")
+            .ok()
+            .and_then(|s| s.try_into().ok())
+            .unwrap_or(Environment::Local)
+    }
     fn as_str(&self) -> &'static str {
         match self {
             Environment::Local => "local",
@@ -41,10 +47,10 @@ pub fn get_config() -> Result<Settings, config::ConfigError> {
     let base_path = std::env::current_dir().expect("Failed to get curren dir");
     let config_dir = base_path.join("config");
 
-    let environment: Environment = std::env::var("APP_ENV")
+    let environment: Environment = std::env::var("APP_ENVIRONMENT")
         .unwrap_or_else(|_| "local".to_string())
         .try_into()
-        .expect("Failed to parse APP_ENV");
+        .expect("Failed to parse APP_ENVIRONMENT");
 
     let environment_filename = format!("{}.yaml", environment.as_str());
 
