@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::{Context, anyhow};
 use async_trait::async_trait;
 use serde::Deserialize;
@@ -8,11 +10,13 @@ use crate::agent::tools::Tool;
 
 const MAX_FILE_SIZE: u64 = 1024 * 1024; // 1 MB
 
-pub struct ReadFile {}
+pub struct ReadFile {
+    root: PathBuf,
+}
 
 impl ReadFile {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(root: PathBuf) -> Self {
+        Self { root }
     }
 }
 
