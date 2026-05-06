@@ -17,5 +17,6 @@ pub trait Tool: Send + Sync {
 }
 
 pub mod list_directory;
+pub mod path;
 pub mod read_file;
-pub mod search_files;
+pub mod write_file;

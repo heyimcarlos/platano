@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_json::json;
 use tracing::instrument;
 
-use crate::agent::tools::Tool;
+use crate::agent::tools::{Tool, path::resolve_safe_path};
 
 const MAX_FILE_SIZE: u64 = 1024 * 1024; // 1 MB
 
@@ -28,7 +28,7 @@ struct ReadFileArgs {
 #[async_trait]
 impl Tool for ReadFile {
     fn name(&self) -> &str {
-        "read_file"
+        "read"
     }
 
     fn description(&self) -> &str {
@@ -52,14 +52,16 @@ impl Tool for ReadFile {
     #[instrument(skip_all, fields(tool = %self.name()), level = "debug")]
     async fn execute(&self, args: serde_json::Value) -> anyhow::Result<String> {
         let args: ReadFileArgs =
-            serde_json::from_value(args).context("Invalid arguments for read_file")?;
+            serde_json::from_value(args).context("Invalid arguments for read")?;
 
-        let metadata = tokio::fs::metadata(&args.path)
+        let resolved = resolve_safe_path(&self.root, &args.path)?;
+
+        let metadata = tokio::fs::metadata(&resolved)
             .await
-            .with_context(|| format!("Failed to stat {}", args.path))?;
+            .with_context(|| format!("Failed to stat {}", resolved.display()))?;
 
         if !metadata.is_file() {
-            return Err(anyhow!("Path is not a file: {}", args.path));
+            return Err(anyhow!("Path is not a file: {}", resolved.display()));
         }
 
         if metadata.len() > MAX_FILE_SIZE {
@@ -70,11 +72,10 @@ impl Tool for ReadFile {
             ));
         }
 
-        let contents = tokio::fs::read_to_string(&args.path)
+        let contents = tokio::fs::read_to_string(&resolved)
             .await
-            .with_context(|| format!("Failed to read {}", args.path))?;
+            .with_context(|| format!("Failed to read {}", resolved.display()))?;
 
-        tracing::info!("Read file {} ({} bytes)", args.path, contents.len());
         Ok(contents)
     }
 }

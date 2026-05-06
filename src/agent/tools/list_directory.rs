@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_json::json;
 use tracing::instrument;
 
-use crate::agent::tools::Tool;
+use crate::agent::tools::{Tool, path::resolve_safe_path};
 
 pub struct ListDirectory {
     root: PathBuf,
@@ -26,7 +26,7 @@ struct ListDirectoryArgs {
 #[async_trait]
 impl Tool for ListDirectory {
     fn name(&self) -> &str {
-        "list_directory"
+        "ls"
     }
 
     fn description(&self) -> &str {
@@ -52,18 +52,20 @@ impl Tool for ListDirectory {
         let args: ListDirectoryArgs =
             serde_json::from_value(args).context("Invalid arguments for list_directory")?;
 
-        let metadata = tokio::fs::metadata(&args.path)
+        let resolved = resolve_safe_path(&self.root, &args.path)?;
+
+        let metadata = tokio::fs::metadata(&resolved)
             .await
-            .with_context(|| format!("Failed to stat {}", args.path))?;
+            .with_context(|| format!("Failed to stat {}", resolved.display()))?;
 
         if !metadata.is_dir() {
-            return Err(anyhow!("Path is not a directory: {}", args.path));
+            return Err(anyhow!("Path is not a directory: {}", resolved.display()));
         }
 
         // let metadata = tokio::fs::canonicalize()
-        let mut entries = tokio::fs::read_dir(&args.path)
+        let mut entries = tokio::fs::read_dir(&resolved)
             .await
-            .with_context(|| format!("Failed to read {}", args.path))?;
+            .with_context(|| format!("Failed to read {}", resolved.display()))?;
 
         //  INFO:Non-rusty approach
         // let mut result = format!("Contents of {}\n", &args.path);
@@ -86,7 +88,7 @@ impl Tool for ListDirectory {
         }
         entries_vec.sort();
 
-        let mut result = format!("Contents of {}:\n", args.path);
+        let mut result = format!("Contents of {}:\n", resolved.display());
         result.push_str(&entries_vec.join("\n"));
 
         Ok(result)
