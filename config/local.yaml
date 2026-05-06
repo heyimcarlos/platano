@@ -1,3 +1,6 @@
 llm:
   base_url: "http://sentinel:11434"
-  model: "hermes3:8b"
+  model: "ibm/granite4.1:8b"
+  # model: "llama3.1:8b"
+  # model: "hermes3:8b"
+  # model: "qwen3.5:9b"
