@@ -24,7 +24,7 @@ where
 }
 
 pub fn get_pretty_subscriber(env_filter: String) -> Box<dyn Subscriber + Send + Sync> {
-    use tracing_subscriber::fmt;
+    use tracing_subscriber::fmt::{self, format::FmtSpan};
 
     let env_filter =
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
@@ -35,7 +35,8 @@ pub fn get_pretty_subscriber(env_filter: String) -> Box<dyn Subscriber + Send + 
                 .compact()
                 .with_target(false)
                 .with_thread_ids(false)
-                .with_thread_names(false),
+                .with_thread_names(false)
+                .with_span_events(FmtSpan::CLOSE),
         ),
     )
 }

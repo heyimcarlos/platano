@@ -4,8 +4,6 @@ use anyhow::{Context, anyhow};
 use async_trait::async_trait;
 use serde::Deserialize;
 use serde_json::json;
-use tracing::instrument;
-
 use crate::agent::tools::{Tool, path::resolve_safe_path};
 
 pub struct ListDirectory {
@@ -47,7 +45,6 @@ impl Tool for ListDirectory {
         })
     }
 
-    #[instrument(skip_all, fields(tool = &self.name()), level = "debug")]
     async fn execute(&self, args: serde_json::Value) -> anyhow::Result<String> {
         let args: ListDirectoryArgs =
             serde_json::from_value(args).context("Invalid arguments for list_directory")?;
