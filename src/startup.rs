@@ -1,7 +1,10 @@
 use crate::{
     agent::{
         Agent,
-        tools::{Tool, list_directory::ListDirectory, read_file::ReadFile, write_file::WriteFile},
+        tools::{
+            Tool, edit_file::EditFile, list_directory::ListDirectory, read_file::ReadFile,
+            write_file::WriteFile,
+        },
     },
     config::Settings,
     llm::{LlmClient, ollama::OllamaClient},
@@ -16,6 +19,7 @@ pub fn build(settings: Settings) -> anyhow::Result<Agent> {
     let read_file = Box::new(ReadFile::new(cwd.clone()));
     let write_file = Box::new(WriteFile::new(cwd.clone()));
     let list_directory = Box::new(ListDirectory::new(cwd.clone()));
-    let tools: Vec<Box<dyn Tool>> = vec![read_file, write_file, list_directory];
+    let edit_file = Box::new(EditFile::new(cwd.clone()));
+    let tools: Vec<Box<dyn Tool>> = vec![read_file, write_file, list_directory, edit_file];
     Ok(Agent::new(llm, tools))
 }
