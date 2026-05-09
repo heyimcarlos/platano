@@ -16,6 +16,7 @@ pub trait Tool: Send + Sync {
     async fn execute(&self, args: Value) -> anyhow::Result<String>;
 }
 
+pub mod edit_file;
 pub mod list_directory;
 pub mod path;
 pub mod read_file;

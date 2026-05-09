@@ -31,9 +31,9 @@ impl Tool for WriteFile {
     }
 
     fn description(&self) -> &str {
-        "Writes content to a file in the project directory. Creates the file \
-        if it does not exist, overwrites if it does. Use for creating new \
-        files or fully replacing existing ones. For partial edits, use `edit`."
+        "Writes content to a file, creating it if it doesn't exist or fully overwriting \
+        it if it does. **Prefer `edit` for modifying existing files** — only use `write` \
+        when creating a new file or when the entire file needs to be replaced."
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

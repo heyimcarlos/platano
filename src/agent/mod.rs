@@ -3,6 +3,7 @@ pub mod tools;
 use anyhow::Context;
 use serde_json::Value;
 use tracing::Instrument;
+use indoc::indoc;
 
 use crate::{
     agent::tools::Tool,
@@ -63,23 +64,32 @@ fn summarize_args(tool: &str, args: &Value) -> String {
         .collect::<Vec<_>>()
         .join(" ")
 }
+const SYSTEM_PROMPT: &str = indoc! {"
+    You are a coding assistant working in a project directory.
+
+    When using tools:
+    - For exploring the project, prefer `ls` and `read` to understand structure before making changes.
+    - For modifying existing files, ALWAYS prefer `edit` over `write`. Use `edit` for any change to an existing file, even small ones. Multiple small edits are better than one large write.
+    - For creating new files, use `write`.
+    - When `edit` fails because of ambiguous or missing matches, add more surrounding context (3-5 lines) and try again.
+
+    Do not guess at file paths. Use `ls` to discover the structure first.
+    Do not regenerate file content if you can edit specific sections instead.
+"};
 
 impl Agent {
     pub fn new(llm: Box<dyn LlmClient>, tools: Vec<Box<dyn Tool>>) -> Self {
         Self {
             llm,
             tools,
-            max_iterations: 10,
+            max_iterations: 100,
         }
     }
     pub async fn run(&self, prompt: String) -> anyhow::Result<String> {
         let mut messages = vec![
             Message {
                 role: Role::System,
-                content: "Your are a helpful assistant with access to tools. Use them whenever \
-                     the user asks about file contents or anything that requires reading \
-                     the local filesystem. Do not guess file contents"
-                    .into(),
+                content: SYSTEM_PROMPT.into(),
                 tool_calls: Option::Some(vec![]),
             },
             Message {
