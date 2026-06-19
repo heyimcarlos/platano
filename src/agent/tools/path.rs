@@ -1,9 +1,6 @@
 use anyhow::{Context, anyhow};
 use std::path::{Path, PathBuf};
 
-//  TODO: move to a struct Sandbox {root: PathBuf}
-//  impl Sandbox {pub fn resolve(&self, requested: &str)}
-
 /// Resolve a user provided path against a sandbox root.
 pub(crate) fn resolve_safe_path(root: &Path, requested: &str) -> anyhow::Result<PathBuf> {
     let canonical_root = root

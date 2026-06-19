@@ -14,14 +14,11 @@ name = "platano"
 [dependencies]
 anyhow = "1.0.102"
 async-trait = "0.1.89"
-claims = "0.8.0"
 config = "0.15.22"
 indoc = "2.0.7"
 reqwest = { version = "0.13.3", default-features = false, features = ["rustls", "json"] }
-secrecy = { version = "0.10.3", features = ["serde"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-thiserror = "2.0.18"
 tokio = { version = "1.52.1", features = ["fs", "macros", "rt-multi-thread"] }
 tracing = "0.1.44"
 tracing-bunyan-formatter = "0.3.10"
@@ -29,6 +26,6 @@ tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 [dev-dependencies]
+claims = "0.8.0"
 tempfile = "3.27.0"
-wiremock = "0.6.5"
 
