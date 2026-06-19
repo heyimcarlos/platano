@@ -78,7 +78,7 @@ impl Agent {
             tracing::debug!(
                 iteration,
                 last_message_role = ?messages.last().map(|m| &m.role),
-                last_message_preview = %truncate(&messages.last().map(|m| m.content.as_str()).unwrap_or(""), 200),
+                last_message_preview = %truncate(messages.last().map(|m| m.content.as_str()).unwrap_or(""), 200),
                 "sending to llm"
             );
 

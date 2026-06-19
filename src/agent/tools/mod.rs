@@ -18,6 +18,6 @@ pub trait Tool: Send + Sync {
 
 pub mod edit_file;
 pub mod list_directory;
-pub mod path;
+mod path;
 pub mod read_file;
 pub mod write_file;

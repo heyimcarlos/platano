@@ -62,23 +62,9 @@ impl Tool for ListDirectory {
             return Err(anyhow!("Path is not a directory: {}", resolved.display()));
         }
 
-        // let metadata = tokio::fs::canonicalize()
         let mut entries = tokio::fs::read_dir(&resolved)
             .await
             .with_context(|| format!("Failed to read {}", resolved.display()))?;
-
-        //  INFO:Non-rusty approach
-        // let mut result = format!("Contents of {}\n", &args.path);
-        // while let Some(entry) = entries.next_entry().await? {
-        //     let mut line = entry.file_name().to_string_lossy().into_owned();
-        //     if let Ok(file_type) = entry.file_type().await {
-        //         if file_type.is_dir() {
-        //             line.push('/')
-        //         }
-        //     }
-        //     result.push_str(&line);
-        //     result.push('\n');
-        // }
 
         let mut entries_vec = Vec::new();
         while let Some(entry) = entries.next_entry().await? {
